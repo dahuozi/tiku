@@ -1,0 +1,98 @@
+// ==UserScript==
+// @name         国家开发大学网自动刷题脚本
+// @namespace    http://www.dahuozi.com
+// @version      0.1
+// @description  一款自动刷题脚本
+// @author       大伙子
+// @match        http://chongqing.ouchn.cn/mod/quiz/*
+// @grant        none
+// ==/UserScript==
+var qjda;
+function showda(da){
+alert(da);
+}
+function daan(wt){
+    //跨域请求jsonp脚本，执行脚本后获取答案数据,变量名字ans
+   $.ajax({
+    type : 'get',
+    url:'http://tk.ngrok.dahuozi.com/sss',
+    data:{"wenti":wt},
+    cache :false,
+//    jsonp: "callback",
+    jsonpCallback:"success",
+        async:false,
+    dataType : 'json',
+    success:function(data){
+        console.log(data.da+data.tm);
+        qjda=data.da;
+      // showda(data.da);
+    },
+    error:function(data){
+        console.log(data);
+    }
+});
+}
+
+
+ //alert("测试成功！");
+    //$('"[class=que truefalse deferredfeedback notyetanswered]" .content "[class=formulation clearfix]" .ablock .answer .r1 input').attr("checked",false)
+//全部选择正确
+
+var text="抓取到的题库：\n";
+//这里代表的是判断题
+for(var i=0;i<$('"[class=que truefalse deferredfeedback notyetanswered]" .content "[class=formulation clearfix]" .qtext p').length;i++)
+{
+
+    //正在向服务器查询题目，根据题目查询答案
+    //alert($('"[class=que truefalse deferredfeedback notyetanswered]" .content "[class=formulation clearfix]" .qtext p')[i].innerText);
+    daan($('"[class=que truefalse deferredfeedback notyetanswered]" .content "[class=formulation clearfix]" .qtext p')[i].innerText);
+    if(qjda == '错')
+       {
+       //代表选择正确的一项
+           //进行选择答案
+           $('"[class=que truefalse deferredfeedback notyetanswered]" .content "[class=formulation clearfix]" .ablock .answer .r1 input').eq(i).attr("checked",true)
+       }
+       else
+       {
+       //代表选择错误的一项
+          $('"[class=que truefalse deferredfeedback notyetanswered]" .content "[class=formulation clearfix]" .ablock .answer .r0 input').eq(i).attr("checked",true)
+       }
+    text = text+$('"[class=que truefalse deferredfeedback notyetanswered]" .content "[class=formulation clearfix]" .qtext p')[i].innerText+"\n";
+    //alert(qjda);
+    //最后执行提交下一页
+$('[class=mod_quiz-next-nav btn btn-primary]').click()
+}
+//这里代表的是选择题
+var xzt=0;
+var xztsum=$('"[class=que multichoice deferredfeedback notyetanswered]" .content "[class=formulation clearfix]" .qtext p').length;
+for(var j=1;j<=xztsum;j++)
+{
+       daan($('"[class=que multichoice deferredfeedback notyetanswered]" .content "[class=formulation clearfix]" .qtext p')[j-1].innerText);
+    //alert(qjda);
+    //执行选择
+       for(var k=(j-1)*4;k<(j-1)*4+4;k++){
+         var str=$('"[class=que multichoice deferredfeedback notyetanswered]" .content "[class=formulation clearfix]" .ablock .answer  label')[k].innerText;
+           var strs=str.split(" ");
+        //alert(strs[1]);
+           //和答案进行比较
+           if(strs[1]==qjda){
+               //进行选择
+               $('"[class=que multichoice deferredfeedback notyetanswered]" .content "[class=formulation clearfix]" .ablock .answer  input').eq(k).attr("checked",true)
+               xzt=xzt+1;
+               break;
+           }
+    }
+}
+if(xzt==xztsum){
+
+//进行提交
+ $('[class=mod_quiz-next-nav btn btn-primary]').click()
+}
+else
+{
+    alert("有题没有选择！");
+}
+
+
+//alert(text);
+
